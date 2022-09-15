@@ -40,6 +40,21 @@ Thumbs.db
 *.exe
 *.war
 
+# Executables
+*.exe
+*.out
+*.app
+ATDS-22
+*.cmake
+.vscode
+CMakeFiles
+Makefile
+CMakeCache.txt
+build/*
+logs/*
+cmake-build-jetson 
+.idea
+
 # Large media files
 *.mp4
 *.tiff

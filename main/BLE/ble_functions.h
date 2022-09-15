@@ -4,8 +4,9 @@
 
 #include    "ble_config.h"
 
-#include    "connection.h"
-#include    "tr_bt_protocol.h"
+
+#include    "TR_BLE/connection.h"
+#include    "TR_BLE/tr_bt_protocol.h"
 typedef struct  {
 
     esp_ble_gatts_cb_param_t *param;
@@ -198,7 +199,7 @@ static void gatts_profile_a_event_handler(esp_gatts_cb_event_t event, esp_gatt_i
 
             tr_bt_protocol_msg_rx_activity(param->write.value,
                                            param->write.len,
-                                           true);
+                                           false);
                                            //(bool)conn->auth);
         }
         example_write_event_env(gatts_if, &a_prepare_write_env, param);

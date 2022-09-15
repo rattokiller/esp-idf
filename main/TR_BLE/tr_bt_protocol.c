@@ -12,7 +12,14 @@
 
 //#include "sl_bt_api.h"
 
-//#include "tr_controller.h"
+//TODO: risolvere include controller
+#include "tr_controller.h"
+
+//TODO: creare file alternativi
+
+//#include "custom/device_info.h"
+//#include "custom/shared_key.h"
+//#include "custom/power_supply.h"
 
 #include "common.h"
 
@@ -576,7 +583,8 @@ tr_bt_protocol_status_t _tr_bt_protocol_msg_rx_activity(unsigned char *raw, uint
         } else {
         */
 
-       /*
+      //TODO: sostituire
+       
             tr_controller_modality_rqt_set(tr_bt_protocol_msg_modality_rqt.mod_type,
                                            tr_bt_protocol_msg_modality_rqt.mod_intensity,
                                            tr_bt_protocol_msg_modality_rqt.mod_time,
@@ -584,7 +592,7 @@ tr_bt_protocol_status_t _tr_bt_protocol_msg_rx_activity(unsigned char *raw, uint
 
             tr_controller_modality_rqt_send();
 
-      */
+      
             //*external_signal = EXTERNAL_SIGNAL_MODALITY_RQT;// already done inside rqt
 
   //}

@@ -29,9 +29,9 @@
 #include "sdkconfig.h"
 
 static char count=0;
-#include "ble_config.h"
+#include "BLE/ble_config.h"
 
-#include "ble_functions.h"
+#include "BLE/ble_functions.h"
 
 #define GPIO_INPUT_IO_0     0
 #define GPIO_INPUT_IO_1     2
