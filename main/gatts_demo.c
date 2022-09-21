@@ -59,15 +59,15 @@ static void gpio_task_example(void* arg)
         if(xQueueReceive(gpio_evt_queue, &io_num, portMAX_DELAY)) {
             count +=gpio_get_level(0);
 
-            
-            
+
+
             memset(&rsp, 0, sizeof(esp_gatt_rsp_t));
-            
-            
+
+
             if( ble_connect.param){
-                
+
                 ESP_LOGI(GATTS_TAG,"%s GPIO[%d] inoltro, count: %d \n",__func__, io_num,count);
-                
+
                 rsp.attr_value.handle = ble_connect.param->read.handle;
                 rsp.attr_value.len = 20;
                 rsp.attr_value.value[0] = 0xff;
@@ -83,16 +83,16 @@ static void gpio_task_example(void* arg)
                                             gatts_TX.attr_value
                                             );
 
-                
+
                 esp_ble_gatts_send_indicate(ble_connect.gatts_if,
                                             ble_connect.param->read.conn_id,
                                             gl_profile_tab[PROFILE_A_APP_ID].char_handle_TX,
                                             20,
                                             gatts_TX.attr_value,
                                             true);
-                
+
             }
-            
+
              ESP_LOGI(GATTS_TAG,"%s GPIO[%d] intr, val: %d , count: %d \n",__func__, io_num, gpio_get_level(0),count);
         }
     }
@@ -102,7 +102,7 @@ void pin_input_init(void)
 {
     //zero-initialize the config structure.
     gpio_config_t io_conf = {};
-     
+
     //interrupt of rising edge
     io_conf.intr_type = GPIO_INTR_POSEDGE;
     //bit mask of the pins, use GPIO4/5 here
@@ -123,7 +123,7 @@ void pin_input_init(void)
     //start gpio task
     xTaskCreate(gpio_task_example, "gpio_task_example", 2048, NULL, 10, NULL);
 
-    
+
     ESP_LOGW(GATTS_TAG,"%s service...",__func__);
     //install gpio isr service
     gpio_install_isr_service(ESP_INTR_FLAG_DEFAULT);
@@ -146,7 +146,7 @@ void app_main(void)
 {
     esp_err_t ret;
 
-    
+
 
     // Initialize NVS.
     ret = nvs_flash_init();
@@ -193,7 +193,7 @@ void app_main(void)
         ESP_LOGE(GATTS_TAG, "gap register error, error code = %x", ret);
         return;
     }
-    
+
     ret = esp_ble_gatts_app_register(PROFILE_A_APP_ID);
     if (ret){
         ESP_LOGE(GATTS_TAG, "gatts app register error, error code = %x", ret);

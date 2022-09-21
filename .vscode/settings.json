@@ -1,9 +1,0 @@
-{
-    "idf.adapterTargetName": "esp32",
-    "idf.portWin": "COM5",
-    "idf.flashType": "UART",
-    "files.associations": {
-        "ble_config.h": "c",
-        "ble_functions.h": "c"
-    }
-}

@@ -8,13 +8,9 @@
 // -----------------------------------------------------------------------------
 // Includes
 
-#include "sl_simple_timer.h"
-
-#include "common.h"
-
-#include "tr_state_event.h"
-
-
+#include <FILO_BLE/common.h>
+#include <FILO_BLe/sl_simple_timer.h>
+#include <FILO_BLE/state_event.h>
 #include "esp_log.h"
 
 #define GATTS_TAG "GATTS_TR_STATE"

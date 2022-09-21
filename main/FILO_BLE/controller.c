@@ -9,16 +9,10 @@
 // -----------------------------------------------------------------------------
 // Includes
 
-#include "sl_simple_timer.h"
-
-
-#include "tr_state_event.h"
-
-
-#include "common.h"
-
-#include "tr_controller.h"
-
+#include <FILO_BLE/common.h>
+#include <FILO_BLE/controller.h>
+#include <FILO_BLE/sl_simple_timer.h>
+#include <FILO_BLE/state_event.h>
 #include "esp_log.h"
 
 #define GATTS_TAG "GATTS_iBeacon"

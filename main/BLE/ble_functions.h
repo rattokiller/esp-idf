@@ -2,11 +2,14 @@
 #define __BLE_FUNCTIONS_H__
 
 
-#include    "ble_config.h"
+
+#include "sdkconfig.h"
+
+#include   "ble_config.h"
 
 
-#include    "TR_BLE/connection.h"
-#include    "TR_BLE/tr_bt_protocol.h"
+#include    "../FILO_BLE/connection.h"
+#include    "../FILO_BLE/bt_protocol.h"
 typedef struct  {
 
     esp_ble_gatts_cb_param_t *param;
@@ -137,7 +140,7 @@ static void gatts_profile_a_event_handler(esp_gatts_cb_event_t event, esp_gatt_i
         gl_profile_tab[PROFILE_A_APP_ID].service_id.id.inst_id = 0x00;
         gl_profile_tab[PROFILE_A_APP_ID].service_id.id.uuid.len = ESP_UUID_LEN_128;//ESP_UUID_LEN_128
         //gl_profile_tab[PROFILE_A_APP_ID].service_id.id.uuid.uuid.uuid16 = GATTS_SERVICE_UUID_TEST_A;
-        
+
         memcpy(&(gl_profile_tab[PROFILE_A_APP_ID].service_id.id.uuid.uuid.uuid128), GATTS_SERVICE_UUID_TEST_A,ESP_UUID_LEN_128);
         esp_err_t set_dev_name_ret = esp_ble_gap_set_device_name(TEST_DEVICE_NAME);
         if (set_dev_name_ret){
@@ -191,13 +194,13 @@ static void gatts_profile_a_event_handler(esp_gatts_cb_event_t event, esp_gatt_i
         if (!param->write.is_prep){
             ESP_LOGI(GATTS_TAG, "GATT_WRITE_EVT, value len %d, value :", param->write.len);
             ESP_LOGI(GATTS_TAG, "GATT_WRITE_EVT, value:  %s", param->write.value);
-            
 
-            tr_bt_protocol_msg_rx_conn_id_set(param->write.conn_id);
+
+            bt_protocol_msg_rx_conn_id_set(param->write.conn_id);
 
             conn = connection_get(param->write.conn_id);
 
-            tr_bt_protocol_msg_rx_activity(param->write.value,
+            bt_protocol_msg_rx_activity(param->write.value,
                                            param->write.len,
                                            false);
                                            //(bool)conn->auth);
@@ -216,7 +219,7 @@ static void gatts_profile_a_event_handler(esp_gatts_cb_event_t event, esp_gatt_i
     case ESP_GATTS_UNREG_EVT:
         break;
     case ESP_GATTS_CREATE_EVT:
-       
+
         //##########################           TX       ################################
         ESP_LOGI(GATTS_TAG, "CREATE_SERVICE_EVT TX, status %d,  service_handle %d\n", param->create.status, param->create.service_handle);
         gl_profile_tab[PROFILE_A_APP_ID].service_handle = param->create.service_handle;
@@ -227,7 +230,7 @@ static void gatts_profile_a_event_handler(esp_gatts_cb_event_t event, esp_gatt_i
         esp_ble_gatts_start_service(gl_profile_tab[PROFILE_A_APP_ID].service_handle);
         a_property = ESP_GATT_CHAR_PROP_BIT_READ | ESP_GATT_CHAR_PROP_BIT_NOTIFY;
         esp_err_t add_char_ret = esp_ble_gatts_add_char(gl_profile_tab[PROFILE_A_APP_ID].service_handle,
-                                                        
+
                                                         &gl_profile_tab[PROFILE_A_APP_ID].char_uuid_TX,
                                                         ESP_GATT_PERM_READ ,
                                                         a_property,
@@ -236,20 +239,20 @@ static void gatts_profile_a_event_handler(esp_gatts_cb_event_t event, esp_gatt_i
             ESP_LOGE(GATTS_TAG, "add char failed, error code =%x",add_char_ret);
         }
         else ESP_LOGI(GATTS_TAG, "add char success! code =%x",add_char_ret);
-        
-        
-        
+
+
+
         //##########################           RX       ################################
         ESP_LOGI(GATTS_TAG, "CREATE_SERVICE_EVT RX, status %d,  service_handle %d\n", param->create.status, param->create.service_handle);
-        
-        
+
+
         //gl_profile_tab[PROFILE_A_APP_ID].char_uuid_RX.uuid.uuid128 = GATTS_CHAR_UUID_TEST_RX;
          gl_profile_tab[PROFILE_A_APP_ID].char_uuid_RX.len = ESP_UUID_LEN_128;
         memcpy(&(gl_profile_tab[PROFILE_A_APP_ID].char_uuid_RX.uuid.uuid128), GATTS_CHAR_UUID_TEST_RX,ESP_UUID_LEN_128);
 
         a_property = ESP_GATT_CHAR_PROP_BIT_WRITE  ;
         esp_err_t add_char_TX = esp_ble_gatts_add_char(gl_profile_tab[PROFILE_A_APP_ID].service_handle,
-                                                        
+
                                                         &gl_profile_tab[PROFILE_A_APP_ID].char_uuid_RX,
                                                         ESP_GATT_PERM_WRITE ,
                                                         a_property,
@@ -258,7 +261,7 @@ static void gatts_profile_a_event_handler(esp_gatts_cb_event_t event, esp_gatt_i
             ESP_LOGE(GATTS_TAG, "add char failed, error code =%x",add_char_TX);
         }
         else ESP_LOGI(GATTS_TAG, "add char success! code =%x",add_char_ret);
-        
+
         break;
     case ESP_GATTS_ADD_INCL_SRVC_EVT:
         break;
@@ -285,7 +288,7 @@ static void gatts_profile_a_event_handler(esp_gatts_cb_event_t event, esp_gatt_i
         if (get_attr_ret == ESP_FAIL){
             ESP_LOGE(GATTS_TAG, "ILLEGAL HANDLE");
         }
-        
+
         ESP_LOGI(GATTS_TAG, "the gatts demo char length = %x\n", length);
         for(int i = 0; i < length; i++){
             ESP_LOGI(GATTS_TAG, "prf_char[%x] =%x\n",i,prf_char[i]);

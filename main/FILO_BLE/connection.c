@@ -7,13 +7,13 @@
 
 // -----------------------------------------------------------------------------
 // Includes
+#include <FILO_BLE/common.h>
+#include <FILO_BLE/connection.h>
 #include <stdlib.h>
 //#include "sl_bgapi.h"
 //sostituire con nostro timere
 
-#include "common.h"
 
-#include "connection.h"
 // -----------------------------------------------------------------------------
 // Configuration
 // -----------------------------------------------------------------------------
