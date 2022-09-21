@@ -10,6 +10,9 @@
 
 #include    "../FILO_BLE/connection.h"
 #include    "../FILO_BLE/bt_protocol.h"
+
+
+#define __DEBUG__
 typedef struct  {
 
     esp_ble_gatts_cb_param_t *param;
@@ -17,6 +20,19 @@ typedef struct  {
 }ble_data_connection;
 
 static ble_data_connection ble_connect;
+
+inline void receive_tx(esp_ble_gatts_cb_param_t *param){
+
+	connection_t* conn;
+	bt_protocol_msg_rx_conn_id_set(param->write.conn_id);
+
+	conn = connection_get(param->write.conn_id);
+
+	bt_protocol_msg_rx_activity(param->write.value,
+								   param->write.len,
+								   false);
+								   //(bool)conn->auth);
+}
 
 void example_write_event_env(esp_gatt_if_t gatts_if, prepare_type_env_t *prepare_write_env, esp_ble_gatts_cb_param_t *param){
     esp_gatt_status_t status = ESP_GATT_OK;
@@ -189,21 +205,17 @@ static void gatts_profile_a_event_handler(esp_gatts_cb_event_t event, esp_gatt_i
         break;
     }
     case ESP_GATTS_WRITE_EVT: {
-        connection_t* conn;
+
         ESP_LOGI(GATTS_TAG, "-------- > GATT_WRITE_EVT, conn_id %d, trans_id %d, handle %d", param->write.conn_id, param->write.trans_id, param->write.handle);
         if (!param->write.is_prep){
             ESP_LOGI(GATTS_TAG, "GATT_WRITE_EVT, value len %d, value :", param->write.len);
             ESP_LOGI(GATTS_TAG, "GATT_WRITE_EVT, value:  %s", param->write.value);
 
 
-            bt_protocol_msg_rx_conn_id_set(param->write.conn_id);
 
-            conn = connection_get(param->write.conn_id);
+            receive_tx(param);
 
-            bt_protocol_msg_rx_activity(param->write.value,
-                                           param->write.len,
-                                           false);
-                                           //(bool)conn->auth);
+
         }
         example_write_event_env(gatts_if, &a_prepare_write_env, param);
         break;
@@ -339,10 +351,19 @@ static void gatts_profile_a_event_handler(esp_gatts_cb_event_t event, esp_gatt_i
         esp_ble_gap_start_advertising(&adv_params);
         break;
     case ESP_GATTS_CONF_EVT:
-        ESP_LOGI(GATTS_TAG, "ESP_GATTS_CONF_EVT, status %d attr_handle %d", param->conf.status, param->conf.handle);
+        ESP_LOGI(GATTS_TAG, "ESP_GATTS_CONF_EVT %s, status %d attr_handle %x",__func__, param->conf.status, param->conf.handle);
+
+			#ifdef __DEBUG__
+				//if (!param->write.is_prep)
+						receive_tx(param);
+			#endif
+
         if (param->conf.status != ESP_GATT_OK){
-            esp_log_buffer_hex(GATTS_TAG, param->conf.value, param->conf.len);
+
+        		esp_log_buffer_hex(GATTS_TAG, param->conf.value, param->conf.len);
+
         }
+
         break;
     case ESP_GATTS_OPEN_EVT:
     case ESP_GATTS_CANCEL_OPEN_EVT:

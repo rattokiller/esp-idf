@@ -15,6 +15,21 @@
 
 #define GATTS_TAG "GATTS_iBeacon"
 
+#define gattdb_generic_attribute              1
+#define gattdb_service_changed_char           3
+#define gattdb_database_hash                  6
+#define gattdb_client_support_features        8
+#define gattdb_device_name                    11
+#define gattdb_device_information             14
+#define gattdb_manufacturer_name_string       16
+#define gattdb_system_id                      18
+#define gattdb_serial_number_string           20
+#define gattdb_hardware_revision_string       22
+#define gattdb_firmware_revision_string       24
+#define gattdb_protocol_tx                    27
+#define gattdb_protocol_rx                    30
+
+
 ///Declare the static function
 static void gatts_profile_a_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, esp_ble_gatts_cb_param_t *param);
 

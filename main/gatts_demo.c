@@ -70,8 +70,8 @@ static void gpio_task_example(void* arg)
 
                 rsp.attr_value.handle = ble_connect.param->read.handle;
                 rsp.attr_value.len = 20;
-                rsp.attr_value.value[0] = 0xff;
-                rsp.attr_value.value[1] = 0xff;
+                rsp.attr_value.value[0] = 0x01;
+                rsp.attr_value.value[1] = 0x01;
 
                 gatts_TX.attr_value[2]= count;
                 rsp.attr_value.value[2] = count;
@@ -83,13 +83,26 @@ static void gpio_task_example(void* arg)
                                             gatts_TX.attr_value
                                             );
 
-
                 esp_ble_gatts_send_indicate(ble_connect.gatts_if,
                                             ble_connect.param->read.conn_id,
                                             gl_profile_tab[PROFILE_A_APP_ID].char_handle_TX,
                                             20,
                                             gatts_TX.attr_value,
                                             true);
+
+
+                esp_ble_gatts_set_attr_value(gl_profile_tab[PROFILE_A_APP_ID].char_handle_RX, //deve essere attribute hendeler
+                                                            3,
+                                                            gatts_TX.attr_value
+                                                            );
+
+
+                esp_ble_gatts_send_indicate(ble_connect.gatts_if,
+									ble_connect.param->read.conn_id,
+									gl_profile_tab[PROFILE_A_APP_ID].char_handle_RX,
+									3,
+									gatts_TX.attr_value,
+									true);
 
             }
 
@@ -205,5 +218,10 @@ void app_main(void)
         ESP_LOGE(GATTS_TAG, "set local  MTU failed, error code = %x", local_mtu_ret);
     }
     ESP_LOGW(GATTS_TAG, "pippo run");
+
+    while(1){
+    	vTaskDelay(10);
+    }
+
     return;
 }

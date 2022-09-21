@@ -17,6 +17,7 @@
 
 #include "../FILO_BLE/controller.h"
 
+#include "../BLE/signal.h"
 #include "esp_log.h"
 
 #define GATTS_TAG "GATTS_iBeacon"
@@ -60,9 +61,9 @@
 #define BT_PROTOCOL_MSG_FIELD_HWV_MIN_DEFAULT             0x00
 #define BT_PROTOCOL_MSG_FIELD_HWV_REL_DEFAULT             0x00
 #define BT_PROTOCOL_MSG_FIELD_MAC_LNG                     DEVICE_INFO_MAC_LEN
-#define BT_PROTOCOL_MSG_FIELD_MAC_DEFAULT                 34
-#define BT_PROTOCOL_MSG_FIELD_SERIAL_LNG                  200
-#define BT_PROTOCOL_MSG_FIELD_SERIAL_DEFAULT              143
+#define BT_PROTOCOL_MSG_FIELD_MAC_DEFAULT                 {0xff, 0xff, 0xff, 0xff, 0xff, 0xff}
+#define BT_PROTOCOL_MSG_FIELD_SERIAL_LNG                  4
+#define BT_PROTOCOL_MSG_FIELD_SERIAL_DEFAULT              {0xff, 0xff, 0xff, 0xff}
 
 //TODO use default value from tr_controllor.h lib
 #define BT_PROTOCOL_MSG_FIELD_BAT_PTC_DEFAULT             0x00
@@ -88,19 +89,19 @@
 #define BT_PROTOCOL_MSG_DEVICE_INFO_RSP_SIZE                 (uint8_t) 19 //2+17
 
 #define BT_PROTOCOL_MSG_DEVICE_INFO_RSP_DEFAULT                            \
-  {                                                                           \
-    .sequence           = BT_PROTOCOL_MSG_FIELD_SEQUENCE_DEFAULT,          \
-    .msgcode            = BT_PROTOCOL_MSG_DEVICE_INFO_RSP_FIELD_MSGCODE,   \
-    .hwv_maj            = BT_PROTOCOL_MSG_FIELD_HWV_MAJ_DEFAULT,               \
-    .hwv_min            = BT_PROTOCOL_MSG_FIELD_HWV_MIN_DEFAULT,               \
-    .hwv_rel            = BT_PROTOCOL_MSG_FIELD_HWV_REL_DEFAULT,               \
-    .fwv_maj            = BT_PROTOCOL_MSG_FIELD_FWV_MAJ_DEFAULT,               \
-    .fwv_min            = BT_PROTOCOL_MSG_FIELD_FWV_MIN_DEFAULT,               \
-    .fwv_rel            = BT_PROTOCOL_MSG_FIELD_FWV_REL_DEFAULT,               \
-    .sn                 = BT_PROTOCOL_MSG_FIELD_SERIAL_DEFAULT,            \
-    .mac                = BT_PROTOCOL_MSG_FIELD_MAC_DEFAULT,               \
-    .bat_ptc            = BT_PROTOCOL_MSG_FIELD_BAT_PTC_DEFAULT            \
-  }
+		{                                                                         \
+	.sequence           = BT_PROTOCOL_MSG_FIELD_SEQUENCE_DEFAULT,          \
+	.msgcode            = BT_PROTOCOL_MSG_DEVICE_INFO_RSP_FIELD_MSGCODE,   \
+	.hwv_maj            = BT_PROTOCOL_MSG_FIELD_HWV_MAJ_DEFAULT,               \
+	.hwv_min            = BT_PROTOCOL_MSG_FIELD_HWV_MIN_DEFAULT,               \
+	.hwv_rel            = BT_PROTOCOL_MSG_FIELD_HWV_REL_DEFAULT,               \
+	.fwv_maj            = BT_PROTOCOL_MSG_FIELD_FWV_MAJ_DEFAULT,               \
+	.fwv_min            = BT_PROTOCOL_MSG_FIELD_FWV_MIN_DEFAULT,               \
+	.fwv_rel            = BT_PROTOCOL_MSG_FIELD_FWV_REL_DEFAULT,               \
+	.sn                 = BT_PROTOCOL_MSG_FIELD_SERIAL_DEFAULT,            \
+	.mac                = BT_PROTOCOL_MSG_FIELD_MAC_DEFAULT,               \
+	.bat_ptc            = BT_PROTOCOL_MSG_FIELD_BAT_PTC_DEFAULT            \
+		}
 
 
 #define BT_PROTOCOL_MSG_AUTH_RQT_FIELD_MSGCODE               0x03
@@ -225,8 +226,8 @@ typedef union
     uint8_t fwv_maj;
     uint8_t fwv_min;
     uint8_t fwv_rel;
-    uint8_t sn[32];//[DEVICE_INFO_SERIAL_LEN];
-    uint8_t mac[30];//[DEVICE_INFO_MAC_LEN];
+    uint8_t sn[6];//BT_PROTOCOL_MSG_FIELD_MAC_DEFAULT
+    uint8_t mac[4];//[DEVICE_INFO_MAC_LEN];
     uint8_t bat_ptc;
   };
 } bt_protocol_msg_device_info_rsp_t;
@@ -414,7 +415,7 @@ void _bt_protocol_msg_tx_raw_create(unsigned char *msg_raw, uint8_t msg_raw_len)
   _bt_protocol_msg_tx_raw_lng = msg_raw_len;
   memcpy(_bt_protocol_msg_tx_raw, msg_raw_copy, msg_raw_len);
 
-  ESP_LOGI(GATTS_TAG,"bt_protocol msg tx raw created\r\n");
+  ESP_LOGI(GATTS_TAG,"bt_protocol msg tx raw created - len: %d\r\n",msg_raw_len);
 }
 
 
@@ -578,12 +579,12 @@ bt_protocol_status_t _bt_protocol_msg_rx_activity(unsigned char *raw, uint8_t ra
 
       //TODO: sostituire
        
-            tr_controller_modality_rqt_set(bt_protocol_msg_modality_rqt.mod_type,
+            controller_modality_rqt_set(bt_protocol_msg_modality_rqt.mod_type,
                                            bt_protocol_msg_modality_rqt.mod_intensity,
                                            bt_protocol_msg_modality_rqt.mod_time,
-                                           TR_CONTROLLER_MODALITY_RQT_SOURCE_EXT);
+                                           CONTROLLER_MODALITY_RQT_SOURCE_EXT);
 
-            tr_controller_modality_rqt_send();
+            controller_modality_rqt_send();
 
       
             //*external_signal = EXTERNAL_SIGNAL_MODALITY_RQT;// already done inside rqt
@@ -647,7 +648,7 @@ void bt_protocol_msg_tx_create_device_info_rsp(void)
   ESP_LOGI(GATTS_TAG,"bt_protocol msg tx create: device info rsp\r\n");
   _bt_protocol_msg_tx_sequence_increase();
 
-  bt_protocol_msg_device_info_rsp_t msg_data;// = BT_PROTOCOL_MSG_DEVICE_INFO_RSP_DEFAULT;
+  bt_protocol_msg_device_info_rsp_t msg_data = BT_PROTOCOL_MSG_DEVICE_INFO_RSP_DEFAULT;
 
   msg_data.sequence = _bt_protocol_msg_tx_sequence_get();
 
@@ -672,7 +673,7 @@ void bt_protocol_msg_tx_create_device_info_rsp(void)
   //_big_to_little_and_viceversa(msg_data.mac, BT_PROTOCOL_MSG_FIELD_MAC_LNG); //its already little endian
 
   msg_data.bat_ptc = 100;
-
+  ESP_LOGI(GATTS_TAG,"bt_protocol msg 123\r\n");
   _bt_protocol_msg_tx_raw_create(msg_data.raw, sizeof(msg_data.raw)/sizeof(unsigned char));
 }
 
@@ -773,7 +774,7 @@ void bt_protocol_msg_rx_activity(unsigned char *raw, uint8_t raw_lng, char auth)
   uint8_t msg_rx_seq = raw_copy[BT_PROTOCOL_MSG_FIELD_SEQUENCE_BYTE_POSTION];
 
   result = _bt_protocol_msg_rx_activity(raw_copy, raw_lng, &external_signal);
-
+  ESP_LOGI(GATTS_TAG,"bt_protocol msg rx: %d - post _bt_protocol_msg_rx_activity\r\n",result);
   if(result != BT_PROTOCOL_STATUS_ERROR)
     {
       ESP_LOGI(GATTS_TAG,"bt_protocol msg rx: set new rx sequence\r\n");
@@ -786,6 +787,6 @@ void bt_protocol_msg_rx_activity(unsigned char *raw, uint8_t raw_lng, char auth)
   if(external_signal != EXTERNAL_SIGNAL_NULL)
     {
 	  //TODO: trovare alternativa !!!
-      //sl_bt_external_signal(external_signal);
+      sl_bt_external_signal(external_signal);
     }
 }
